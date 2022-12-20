@@ -40,13 +40,16 @@
   </div>
 </template>
 <script>
-import { reactive, toRefs, ref } from 'vue';
 import sha1 from 'js-sha1'
-import { Login, GetCode, Register } from '@/api/common'
+import { reactive, toRefs, ref } from 'vue';
 import { ElMessage } from 'element-plus'
+import { useStore } from 'vuex'
+import { Login, GetCode, Register } from '@/api/common'
 
 export default {
   setup() {
+    const store = useStore()
+    const router = useRouter()
     const data = reactive({
       username: '',
       password: '',
@@ -95,8 +98,12 @@ export default {
         password: sha1(data.password),
         code: data.captcha
       }
-      let res = await Login(requestData)
-      
+      try {
+        await store.dispatch('app/loginAction', requestData)
+        router.push({ path: '/console' })
+      } catch (error) {
+        console.log(error)
+      }
     }
     const register = () => {
       Register()
